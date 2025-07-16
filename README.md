@@ -81,5 +81,5 @@ EventGeoLocationId                      	25
 ## Voir aussi
 
 - [ST25TB series NFC tags for fun in French public transports](https://raw.githubusercontent.com/gentilkiwi/st25tb_kiemul/main/ST25TB_transport.pdf) par gentilkiwi [PDF]
-- [ST25TB datasheet](https://www.st.com/resource/en/datasheet/st25tb04k.pdf)
+- [ST25TB datasheet](https://www.st.com/resource/en/datasheet/st25tb04k.pdf) [PDF]
 - [FAQ tickets rechargeables Tisséo](https://www.tisseo.fr/FAQ?thematic=generalites)
