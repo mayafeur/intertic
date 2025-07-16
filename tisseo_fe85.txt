@@ -1,0 +1,25 @@
+Filetype: Flipper NFC device
+Version: 4
+# Device type can be ISO14443-3A, ISO14443-3B, ISO14443-4A, ISO14443-4B, ISO15693-3, FeliCa, NTAG/Ultralight, Mifare Classic, Mifare Plus, Mifare DESFire, SLIX, ST25TB
+Device type: ST25TB
+# UID is common for all formats
+UID: D0 02 33 81 23 BA FE 85
+# ST25TB specific data
+ST25TB Type: 512AT
+Block 0: 30 20 40 11
+Block 1: 24 16 09 25
+Block 2: CA 6A 1F 04
+Block 3: 08 90 2A FC
+Block 4: EA 83 F3 C2
+Block 5: 00 00 00 FE
+Block 6: EC FF FF FF
+Block 7: 00 E0 0C 00
+Block 8: A5 1A 00 00
+Block 9: 03 36 00 C4
+Block 10: 08 38 23 FC
+Block 11: EA 83 F3 CC
+Block 12: 03 A0 0B 00
+Block 13: 9F 18 00 C0
+Block 14: AD BD 12 C4
+Block 15: DD 74 5C 72
+System OTP Block: FF FF FF FF
