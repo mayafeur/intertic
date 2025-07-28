@@ -82,9 +82,12 @@ class Ticket:
                 if "UID:" in line:
                     uid = line.split(":")[1]
                     self.UID = Chunk(uid)
-                if "Block" in line:
+                if "Block" in line:   # Flipper dump
                     reversed_bytes_str = line.split(":")[1]
                     self.blocks.append(Chunk(reversed_bytes_str, True))
+                if "|     " in line:  # Near Field Chaos dump
+                    bytes_str = line.split("|")[2]
+                    self.blocks.append(Chunk(bytes_str, False))
     
     def __str__(self):
         str = f"UID: {self.UID.bytes_str}\n"
