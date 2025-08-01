@@ -3,23 +3,47 @@ import sys
 from bitarray import bitarray
 from bitarray.util import ba2int
 
-CODE_NATURE_STR = {
-    0: '-',
-    1: 'bus',
-    3: 'metro',
-    4: 'tramway',
+CONTRACT_TARIFF_STR = {
+    2005: "1 déplacement",
+    2007: "1 déplacement dernière minute",
+    2010: "10 déplacements",
+    2020: "2 déplacements",
+    2060: "1 déplacement (SAV)",
+    2090: "1 déplacement aéroport",
 }
 
-CODE_TYPE_STR = {
-    0: '-',
-    1: 'entry validation',
-    6: 'connection entry validation',
+COUNTRY_STR = {
+    0x250: "France",
 }
 
-GEO_ROUTE_DIRECTION_STR = {
-    0: '-',
-    1: 'outward',
-    2: 'inward',
+ORGANIZATIONAL_AUTHORITY_STR = {
+    0x916: "Tisséo"
+}
+
+EVENT_CODE_NATURE_STR = {
+    1: 'Autobus',
+    3: 'Métro',
+    4: 'Tramway',
+}
+
+EVENT_CODE_TYPE_STR = {
+    1: 'Validation',
+    6: 'Validation en correspondance',
+}
+
+EVENT_GEO_ROUTE_DIRECTION_STR = {
+    1: 'Aller',
+    2: 'Retour',
+}
+
+EVENT_GEO_ROUTE_ID_STR = {
+    24: "Navette aéroport",
+    262: "Navette cimetières",
+    1001: "Métro A",
+    1002: "Métro B",
+    1003: "Ligne C",
+    1005: "Tramway T1",
+    1007: "Câble Téléo",
 }
 
 class Chunk:
@@ -103,18 +127,18 @@ class Ticket:
         PARTITION_ID = system_chunk.read(5)
         
         return {
-            "Key ID": hex(KEY_ID.int),
-            "Partition ID": hex(PARTITION_ID.int),
+            "Clé": hex(KEY_ID.int),
+            "Partition": hex(PARTITION_ID.int),
             "UID (hex)": self.UID.bytes_str,
-            "UID (decimal)": self.UID.int,
+            "UID (décimal)": self.UID.int,
         }
     
     def get_distribution(self) -> dict:
         distribution_chunk = self.blocks[1] + self.blocks[2] + self.blocks[0]
         
-        COUNTRY_CODE = hex(distribution_chunk.read(12).int)
-        ORGANIZATIONAL_AUTHORITY = hex(distribution_chunk.read(12).int)
-        CONTRACT_APP_VERSION_NUMBER = distribution_chunk.read(6).int
+        COUNTRY_CODE = distribution_chunk.read(12).int
+        ORGANIZATIONAL_AUTHORITY = distribution_chunk.read(12).int
+        CONTRACT_APPLICATION_VERSION_NUMBER = distribution_chunk.read(6).int
         CONTRACT_PROVIDER = distribution_chunk.read(8).int
         CONTRACT_TARIFF = distribution_chunk.read(16).int
         CONTRACT_MEDIUM_END_DATE = distribution_chunk.read(14).date
@@ -123,14 +147,14 @@ class Ticket:
         CONTRACT_SALE_AGENT = distribution_chunk.read(8).int
         
         return {
-            "Certificate": self.blocks[15].bytes_str,
-            "ContractApplicationVersionNumber": CONTRACT_APP_VERSION_NUMBER,
-            "ContractMediumEndDate": CONTRACT_MEDIUM_END_DATE,
-            "ContractProvider": CONTRACT_PROVIDER,
-            "ContractSaleAgent": CONTRACT_SALE_AGENT,
-            "ContractTariff": CONTRACT_TARIFF,
-            "CountryCode": COUNTRY_CODE,
-            "OrganizationalAuthority": ORGANIZATIONAL_AUTHORITY,
+            "Certificat": self.blocks[15].bytes_str,
+            "Version du contrat": CONTRACT_APPLICATION_VERSION_NUMBER,
+            "Date de fin du contrat": CONTRACT_MEDIUM_END_DATE,
+            "Fournisseur": CONTRACT_PROVIDER,
+            "Exploitant": CONTRACT_SALE_AGENT,
+            "Tarif": print_from_dict(CONTRACT_TARIFF, CONTRACT_TARIFF_STR),
+            "Pays": print_from_dict(COUNTRY_CODE, COUNTRY_STR),
+            "Autorité organisatrice": print_from_dict(ORGANIZATIONAL_AUTHORITY, ORGANIZATIONAL_AUTHORITY_STR),
         }
     
     def get_usage(self, usage_b=False) -> dict:
@@ -140,17 +164,17 @@ class Ticket:
             chunk = self.blocks[10] + self.blocks[11] + self.blocks[12] + self.blocks[13] + self.blocks[14]
             
         distribution = self.get_distribution()
-        CONTRACT_MEDIUM_END_DATE = distribution["ContractMediumEndDate"]
+        CONTRACT_MEDIUM_END_DATE = distribution["Date de fin du contrat"]
         
         EVENT_DATE_STAMP = chunk.read(10).datediff(CONTRACT_MEDIUM_END_DATE)
         EVENT_TIME_STAMP = chunk.read(11).time
         EVENT_PROVIDER = chunk.read(8).int
-        EVENT_CODE_NATURE = CODE_NATURE_STR[chunk.read(5).int]
-        EVENT_CODE_TYPE = CODE_TYPE_STR[chunk.read(5).int]
+        EVENT_CODE_NATURE = chunk.read(5).int
+        EVENT_CODE_TYPE = chunk.read(5).int
         EVENT_BITMAP = chunk.read(5)
         EVENT_GEO_BITMAP = chunk.read(6)
         EVENT_GEO_ROUTE_ID = chunk.read(14).int
-        EVENT_GEO_ROUTE_DIRECTION = GEO_ROUTE_DIRECTION_STR[chunk.read(2).int]
+        EVENT_GEO_ROUTE_DIRECTION = chunk.read(2).int
         
         IS_EVENT_GEO_LOCATION_ID = EVENT_GEO_BITMAP.bits[4:5] == bitarray('1')
         if IS_EVENT_GEO_LOCATION_ID:
@@ -169,20 +193,20 @@ class Ticket:
         EVENT_COUNT_INTERCHANGES = chunk.read(3).int
         
         return {
-            "EventCode/Nature": EVENT_CODE_NATURE,
-            "EventCode/Type": EVENT_CODE_TYPE,
-            "EventProvider": EVENT_PROVIDER,
-            "EventDateStamp": EVENT_DATE_STAMP,
-            "EventTimeStamp": EVENT_TIME_STAMP,
-            "EventGeoRouteDirection": EVENT_GEO_ROUTE_DIRECTION,
-            "EventGeoRouteId": EVENT_GEO_ROUTE_ID,
-            "EventRouteId1": EVENT_ROUTE_ID_1,
-            "EventRouteId2": EVENT_ROUTE_ID_2,
-            "EventValidityTimeFirstStamp": EVENT_VALIDITY_TIME_FIRST_STAMP,
-            "EventCount": EVENT_COUNT,
-            "EventCountInterchanges": EVENT_COUNT_INTERCHANGES,
-            "EventCountPassengers": EVENT_COUNT_PASSENGERS,
-            "EventGeoLocationId": EVENT_GEO_LOCATION_ID,
+            "Moyen de transport": print_from_dict(EVENT_CODE_NATURE, EVENT_CODE_NATURE_STR),
+            "Action": print_from_dict(EVENT_CODE_TYPE, EVENT_CODE_TYPE_STR),
+            "Exploitant": EVENT_PROVIDER,
+            "Date": EVENT_DATE_STAMP,
+            "Heure": EVENT_TIME_STAMP,
+            "Direction": print_from_dict(EVENT_GEO_ROUTE_DIRECTION, EVENT_GEO_ROUTE_DIRECTION_STR),
+            "Ligne empruntée": print_from_dict(EVENT_GEO_ROUTE_ID, EVENT_GEO_ROUTE_ID_STR, True),
+            "Ligne précédente": print_from_dict(EVENT_ROUTE_ID_1, EVENT_GEO_ROUTE_ID_STR),
+            "Ligne encore précédente": print_from_dict(EVENT_ROUTE_ID_2, EVENT_GEO_ROUTE_ID_STR),
+            "Heure de 1e validation": EVENT_VALIDITY_TIME_FIRST_STAMP,
+            "Nombre de trajets": EVENT_COUNT,
+            "Nombre de correspondances": EVENT_COUNT_INTERCHANGES,
+            "Nombre de passagers": EVENT_COUNT_PASSENGERS,
+            "Station": EVENT_GEO_LOCATION_ID,
         }
         
     def get_counters(self) -> dict:
@@ -195,25 +219,36 @@ class Ticket:
         NEXT_USAGE = 'Usage A' if SWAP.int % 2 else 'Usage B'
         
         return {
-            "Next usage":NEXT_USAGE,
-            "Swap count": 0xFFFFFFFF - SWAP.int,
-            "Tickets available": AVAILABLE.int,
-            "Loadings": 255 - LOADED.int,
+            "Prochain usage":NEXT_USAGE,
+            "Swap": 0xFFFFFFFF - SWAP.int,
+            "Titres disponibles": AVAILABLE.int,
+            "Chargements effectués": 255 - LOADED.int,
         }
 
 def print_dict_pretty(title: str, dict_to_print: dict) -> None:
     print(title)
     print(''.join(['-' for _ in range(len(title))]))
     for key, value in dict_to_print.items():
-        print(f"{key:40}\t{value}")
+        print(f"{key:30}{value}")
     print()
+    
+def print_from_dict(raw_value: int, str_dict: dict, just_int=False) -> str:
+    raw_value_hex = hex(raw_value)
+    if raw_value in str_dict.keys():
+        return str_dict[raw_value]
+    elif raw_value == 0:
+        return "-"
+    elif just_int:
+        return raw_value
+    else:
+        return f"?   {raw_value_hex} / {raw_value}"
 
 if(len(sys.argv) != 2):
-    raise Exception("Filename missing")
+    raise Exception("Nom de fichier non trouvé")
 
 ticket = Ticket(sys.argv[1])
+print_dict_pretty("Système", ticket.get_system_data())
 print_dict_pretty("Distribution", ticket.get_distribution())
-print_dict_pretty("System data", ticket.get_system_data())
-print_dict_pretty("Counters", ticket.get_counters())
+print_dict_pretty("Compteurs", ticket.get_counters())
 print_dict_pretty("Usage A", ticket.get_usage(False))
 print_dict_pretty("Usage B", ticket.get_usage(True))
