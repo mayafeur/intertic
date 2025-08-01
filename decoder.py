@@ -172,19 +172,28 @@ class Ticket:
         EVENT_CODE_NATURE = chunk.read(5).int
         EVENT_CODE_TYPE = chunk.read(5).int
         EVENT_BITMAP = chunk.read(5)
-        EVENT_GEO_BITMAP = chunk.read(6)
-        EVENT_GEO_ROUTE_ID = chunk.read(14).int
-        EVENT_GEO_ROUTE_DIRECTION = chunk.read(2).int
         
-        IS_EVENT_GEO_LOCATION_ID = EVENT_GEO_BITMAP.bits[4:5] == bitarray('1')
-        if IS_EVENT_GEO_LOCATION_ID:
-            EVENT_GEO_LOCATION_ID = chunk.read(16).int
-        else:
-            EVENT_GEO_LOCATION_ID = "-"
+        EVENT_GEO_ROUTE_ID = 0
+        EVENT_GEO_ROUTE_DIRECTION = 0
+        EVENT_GEO_LOCATION_ID = "-"
+        EVENT_ROUTE_ID_1 = 0
+        EVENT_ROUTE_ID_2 = 0
+        
+        IS_EVENT_GEO_AND_ROUTE_IDS = EVENT_BITMAP.bits[1:3] == bitarray('11')
+        if IS_EVENT_GEO_AND_ROUTE_IDS:
+
+            EVENT_GEO_BITMAP = chunk.read(6)
+            EVENT_GEO_ROUTE_ID = chunk.read(14).int
+            EVENT_GEO_ROUTE_DIRECTION = chunk.read(2).int
             
-        EVENT_ROUTE_BITMAP = chunk.read(2)
-        EVENT_ROUTE_ID_1 = chunk.read(14).int
-        EVENT_ROUTE_ID_2 = chunk.read(14).int
+            IS_EVENT_GEO_LOCATION_ID = EVENT_GEO_BITMAP.bits[4:5] == bitarray('1')
+            if IS_EVENT_GEO_LOCATION_ID:
+                EVENT_GEO_LOCATION_ID = chunk.read(16).int
+            
+            EVENT_ROUTE_BITMAP = chunk.read(2)
+            EVENT_ROUTE_ID_1 = chunk.read(14).int
+            EVENT_ROUTE_ID_2 = chunk.read(14).int
+            
         EVENT_VALIDITY_BITMAP = chunk.read(4)
         EVENT_VALIDITY_TIME_FIRST_STAMP = chunk.read(11).time
         EVENT_COUNT_BITMAP = chunk.read(3)
@@ -252,3 +261,8 @@ print_dict_pretty("Distribution", ticket.get_distribution())
 print_dict_pretty("Compteurs", ticket.get_counters())
 print_dict_pretty("Usage A", ticket.get_usage(False))
 print_dict_pretty("Usage B", ticket.get_usage(True))
+print(ticket.blocks[3])
+print(ticket.blocks[4])
+print(ticket.blocks[7])
+print(ticket.blocks[8])
+print(ticket.blocks[9])
