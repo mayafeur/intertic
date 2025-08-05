@@ -39,6 +39,7 @@ EVENT_GEO_ROUTE_DIRECTION_STR = {
 EVENT_GEO_ROUTE_ID_STR = {
     24: "Navette aéroport",
     262: "Navette cimetières",
+    835: "Bus relai métro B",
     1001: "Métro A",
     1002: "Métro B",
     1003: "Ligne C",
@@ -209,8 +210,8 @@ class Ticket:
             "Heure": EVENT_TIME_STAMP,
             "Direction": print_from_dict(EVENT_GEO_ROUTE_DIRECTION, EVENT_GEO_ROUTE_DIRECTION_STR),
             "Ligne empruntée": print_from_dict(EVENT_GEO_ROUTE_ID, EVENT_GEO_ROUTE_ID_STR, True),
-            "Ligne précédente": print_from_dict(EVENT_ROUTE_ID_1, EVENT_GEO_ROUTE_ID_STR),
-            "Ligne encore précédente": print_from_dict(EVENT_ROUTE_ID_2, EVENT_GEO_ROUTE_ID_STR),
+            "Ligne précédente": print_from_dict(EVENT_ROUTE_ID_1, EVENT_GEO_ROUTE_ID_STR, True),
+            "Ligne encore précédente": print_from_dict(EVENT_ROUTE_ID_2, EVENT_GEO_ROUTE_ID_STR, True),
             "Heure de 1e validation": EVENT_VALIDITY_TIME_FIRST_STAMP,
             "Nombre de trajets": EVENT_COUNT,
             "Nombre de correspondances": EVENT_COUNT_INTERCHANGES,
